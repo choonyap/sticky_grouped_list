@@ -139,6 +139,9 @@ class StickyGroupedListView<T, E> extends StatefulWidget {
   /// Show sticky header
   final bool showStickyHeader;
 
+  // custom header builder
+  final Widget Function(Widget header)? stickyHeaderBuilder;
+
   /// Creates a [StickyGroupedListView].
   const StickyGroupedListView({
     super.key,
@@ -169,6 +172,7 @@ class StickyGroupedListView<T, E> extends StatefulWidget {
     this.initialScrollIndex = 0,
     this.shrinkWrap = false,
     this.showStickyHeader = true,
+    this.stickyHeaderBuilder,
   }) : assert(itemBuilder != null || indexedItemBuilder != null);
 
   @override
@@ -282,11 +286,19 @@ class StickyGroupedListViewState<T, E> extends State<StickyGroupedListView<T, E>
           },
         ),
         widget.showStickyHeader
-            ? StreamBuilder<int>(
-                stream: _streamController.stream,
-                initialData: _topElementIndex,
-                builder: (_, snapshot) => _showFixedGroupHeader(snapshot.data!),
-              )
+            ? widget.stickyHeaderBuilder != null
+                ? widget.stickyHeaderBuilder!(
+                    StreamBuilder<int>(
+                      stream: _streamController.stream,
+                      initialData: _topElementIndex,
+                      builder: (_, snapshot) => _showFixedGroupHeader(snapshot.data!),
+                    ),
+                  )
+                : StreamBuilder<int>(
+                    stream: _streamController.stream,
+                    initialData: _topElementIndex,
+                    builder: (_, snapshot) => _showFixedGroupHeader(snapshot.data!),
+                  )
             : const SizedBox.shrink(),
       ],
     );
